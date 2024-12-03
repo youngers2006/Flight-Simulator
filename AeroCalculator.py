@@ -10,6 +10,7 @@ from scipy.interpolate import RegularGridInterpolator
 def getValue2D(x, y, filename):
     """This function gets the value from the data using interpolation
     with the given x and y values, by accessing the csv file given"""
+    # Note for Sam: This function looks ok
     data = genfromtxt(filename, delimiter=",")
     # extract x and y values
     xValues = data[1, 1:]
@@ -21,15 +22,21 @@ def getValue2D(x, y, filename):
 
 
 def getValue3D(x, y, z, filename):
+    # takes in a file as data
     data = genfromtxt(filename, delimiter=",")
+    # iterates across data and filters out not a number data 
     nanIndices = [i for i, row in enumerate(data) if row[0] != row[0]]
+    # iterates across not a number (which are indicies of the original data) and adds them to a list where there is a jump in the consecutive values greater than 1
     jumpIndices = [0] + [nanIndices[i] for i in range(1, len(nanIndices)) if nanIndices[i] - nanIndices[i - 1] > 1]
+    #collects all corresponding values in data to where the jump indicies are greater than the length og the jump indicies list and saves them to dataArrays
     dataArrays = [
         data[jumpIndices[i] : jumpIndices[i + 1] if i + 1 < len(jumpIndices) else None, :]
         for i in range(len(jumpIndices) - 1)
     ] + [data[jumpIndices[-1] :, :]]
+    # iterates through data and finds for each sub array the zeroth indexed subarray and the 1st indexed array within that and saves it to Z files
     zValues = [dataArray[0, 1] for dataArray in dataArrays]
-
+    
+    
     aboveIndex = next((i for i, val in enumerate(zValues) if val > z), None)
     belowIndex = aboveIndex - 1 if aboveIndex is not None else None
     if z in zValues:
